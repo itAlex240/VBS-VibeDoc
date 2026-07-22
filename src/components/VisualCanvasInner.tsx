@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef } from "react";
 import { Tldraw, Editor, getSnapshot, loadSnapshot } from "tldraw";
+import { toast } from "sonner";
 import "tldraw/tldraw.css";
 
 interface VisualCanvasInnerProps {
@@ -38,10 +39,66 @@ export default function VisualCanvasInner({
       }
     }
 
-    // Subscribe to canvas changes
+    // Subscribe to canvas changes & intercept Base64 image asset creation
     const cleanup = editor.store.listen(
-      () => {
+      async (change) => {
         if (isInternalChangeRef.current) return;
+
+        // 1. Intercept newly added Base64 image assets to upload locally
+        if (change.changes.added) {
+          for (const record of Object.values(change.changes.added)) {
+            if (
+              record.typeName === "asset" &&
+              record.type === "image" &&
+              typeof record.props?.src === "string" &&
+              record.props.src.startsWith("data:image/")
+            ) {
+              try {
+                const base64Data = record.props.src;
+                const mimeMatch = base64Data.match(/^data:(image\/[a-zA-Z+]+);base64,/);
+                const mimeType = mimeMatch ? mimeMatch[1] : "image/png";
+
+                // Convert Base64 string to Blob & File
+                const blobRes = await fetch(base64Data);
+                const blob = await blobRes.blob();
+                const ext = mimeType.split("/")[1] || "png";
+                const file = new File([blob], `canvas_img_${Date.now()}.${ext}`, {
+                  type: mimeType,
+                });
+
+                // Upload to /api/upload
+                const formData = new FormData();
+                formData.append("file", file);
+
+                const uploadRes = await fetch("/api/upload", {
+                  method: "POST",
+                  body: formData,
+                });
+
+                if (uploadRes.ok) {
+                  const data = await uploadRes.json();
+                  isInternalChangeRef.current = true;
+                  // Replace Base64 src with local URL in store
+                  editor.store.put([
+                    {
+                      ...record,
+                      props: {
+                        ...record.props,
+                        src: data.url,
+                      },
+                    },
+                  ]);
+                  isInternalChangeRef.current = false;
+                  toast.success("Canvas image saved locally!");
+                }
+              } catch (uploadErr) {
+                console.error("Failed to upload tldraw canvas image:", uploadErr);
+              }
+            }
+          }
+        }
+
+        // 2. Notify parent of canvas state changes
         try {
           const snapshot = getSnapshot(editor.store);
           const serialized = JSON.stringify(snapshot);

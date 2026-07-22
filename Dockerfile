@@ -35,8 +35,8 @@ ENV DATABASE_URL="file:/app/prisma/data/dev.db"
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Create data directory for persistent SQLite database volume
-RUN mkdir -p /app/prisma/data && chown -R nextjs:nodejs /app/prisma
+# Create data directories for persistent SQLite database and image uploads
+RUN mkdir -p /app/prisma/data /app/public/uploads && chown -R nextjs:nodejs /app/prisma /app/public
 
 # Copy built standalone Next.js application
 COPY --from=builder /app/public ./public

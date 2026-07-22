@@ -14,3 +14,5 @@ services:
     volumes:
       # Persistent local volume mount for SQLite database storage
       - ./prisma/data:/app/prisma/data
+      # Persistent volume mount for uploaded image assets
+      - ./public/uploads:/app/public/uploads

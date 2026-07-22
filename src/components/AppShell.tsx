@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { Group, Panel, Separator } from "react-resizable-panels";
 import { Sidebar } from "@/components/Sidebar";
 import { Header } from "@/components/Header";
 import { MarkdownEditor } from "@/components/MarkdownEditor";
@@ -8,7 +9,8 @@ import { VisualCanvas } from "@/components/VisualCanvas";
 import { SettingsModal } from "@/components/SettingsModal";
 import { AiVbScriptModal } from "@/components/AiVbScriptModal";
 import { useDocumentManager } from "@/hooks/useDocumentManager";
-import { FileText, Loader2, Sparkles, EyeOff } from "lucide-react";
+import { FileText, Loader2, EyeOff } from "lucide-react";
+import { toast } from "sonner";
 
 export function AppShell() {
   const {
@@ -17,7 +19,6 @@ export function AppShell() {
     setActiveDocumentId,
     currentDocument,
     loading,
-    docLoading,
     saveStatus,
     updateDocumentField,
     createDocument,
@@ -34,6 +35,7 @@ export function AppShell() {
     if (!currentDocument) return;
     const newMarkdown = (currentDocument.markdownContent || "") + generatedDocs;
     updateDocumentField("markdownContent", newMarkdown);
+    toast.success("AI documentation appended!");
   };
 
   const handlePrint = () => {
@@ -58,7 +60,7 @@ export function AppShell() {
       )}
 
       {/* Main Container */}
-      <div className="flex-1 flex flex-col h-full overflow-hidden relative">
+      <div className="flex-1 flex flex-col h-full overflow-hidden relative min-w-0">
         {/* Header Bar - hidden in Presentation Mode */}
         {!isPresentationMode && currentDocument && (
           <Header
@@ -87,7 +89,7 @@ export function AppShell() {
         )}
 
         {/* Workspace Area */}
-        <main className="flex-1 flex flex-col overflow-y-auto min-h-0 bg-[var(--background)]">
+        <main className="flex-1 flex flex-col overflow-hidden min-h-0 bg-[var(--background)]">
           {loading ? (
             <div className="flex flex-col items-center justify-center flex-1 text-zinc-400 py-12">
               <Loader2 className="w-8 h-8 animate-spin mb-3 text-blue-500" />
@@ -109,39 +111,53 @@ export function AppShell() {
                 + Create First Document
               </button>
             </div>
-          ) : (
-            <div className="flex flex-col flex-1 divide-y divide-[var(--border)]">
-              {/* Stacked Vertical Layout: Top = Markdown, Bottom = Visual Canvas */}
-
-              {/* 1. Markdown Editor & Preview */}
-              <div
-                className={`${
-                  isPresentationMode ? "w-full py-6" : "min-h-[400px] flex-1"
-                }`}
-              >
+          ) : isPresentationMode ? (
+            /* Presentation Mode Layout: Scrollable Centered View */
+            <div className="flex-1 overflow-y-auto p-6 space-y-8 max-w-5xl mx-auto w-full">
+              <div className="w-full">
                 <MarkdownEditor
                   value={currentDocument.markdownContent}
                   onChange={(val) => updateDocumentField("markdownContent", val)}
-                  isPresentationMode={isPresentationMode}
+                  isPresentationMode={true}
                   onOpenAiModal={() => setIsAiModalOpen(true)}
                 />
               </div>
 
-              {/* 2. Visual Canvas (tldraw) */}
-              <div
-                className={`${
-                  isPresentationMode
-                    ? "w-full min-h-[600px] max-w-5xl mx-auto my-8 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-sm"
-                    : "h-[500px] flex-shrink-0"
-                }`}
-              >
+              <div className="w-full min-h-[600px] border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-sm">
                 <VisualCanvas
                   canvasState={currentDocument.canvasState}
                   onCanvasChange={(state) => updateDocumentField("canvasState", state)}
-                  isPresentationMode={isPresentationMode}
+                  isPresentationMode={true}
                 />
               </div>
             </div>
+          ) : (
+            /* Normal Workspace Layout: Horizontal Resizable Panels */
+            <Group orientation="horizontal" className="flex-1 w-full h-full min-h-0">
+              {/* Left Panel: Markdown Editor */}
+              <Panel defaultSize={50} minSize={20} className="flex flex-col h-full overflow-hidden">
+                <MarkdownEditor
+                  value={currentDocument.markdownContent}
+                  onChange={(val) => updateDocumentField("markdownContent", val)}
+                  isPresentationMode={false}
+                  onOpenAiModal={() => setIsAiModalOpen(true)}
+                />
+              </Panel>
+
+              {/* Resizable Divider Separator */}
+              <Separator className="w-2 bg-[var(--border)] hover:bg-blue-500/80 active:bg-blue-600 transition-colors cursor-col-resize flex items-center justify-center group z-30 select-none">
+                <div className="w-1 h-8 bg-zinc-400 dark:bg-zinc-600 group-hover:bg-white rounded-full transition-colors" />
+              </Separator>
+
+              {/* Right Panel: tldraw Visual Workspace Canvas */}
+              <Panel defaultSize={50} minSize={20} className="flex flex-col h-full overflow-hidden">
+                <VisualCanvas
+                  canvasState={currentDocument.canvasState}
+                  onCanvasChange={(state) => updateDocumentField("canvasState", state)}
+                  isPresentationMode={false}
+                />
+              </Panel>
+            </Group>
           )}
         </main>
       </div>

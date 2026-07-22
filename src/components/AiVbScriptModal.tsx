@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { Sparkles, X, Loader2, Code, FileText, AlertCircle } from "lucide-react";
+import { toast } from "sonner";
 
 interface AiVbScriptModalProps {
   isOpen: boolean;
@@ -23,11 +24,13 @@ export function AiVbScriptModal({
   const handleGenerate = async () => {
     if (!code.trim()) {
       setError("Please paste some VBScript code to analyze.");
+      toast.error("Please paste VBScript code first.");
       return;
     }
 
     setLoading(true);
     setError(null);
+    const toastId = toast.loading("Analyzing VBScript & generating documentation...");
 
     try {
       const res = await fetch("/api/ai/document-vbscript", {
@@ -46,9 +49,12 @@ export function AiVbScriptModal({
 
       onAppendMarkdown(formattedMarkdown);
       setCode("");
+      toast.success("VBScript documentation generated successfully!", { id: toastId });
       onClose();
     } catch (err: any) {
-      setError(err.message || "An error occurred");
+      const errorMsg = err.message || "An error occurred during AI generation.";
+      setError(errorMsg);
+      toast.error(errorMsg, { id: toastId });
     } finally {
       setLoading(false);
     }

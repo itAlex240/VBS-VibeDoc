@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { DocumentItem } from "@/components/Sidebar";
+import { toast } from "sonner";
 
 export interface FullDocument {
   id: string;
@@ -37,6 +38,7 @@ export function useDocumentManager() {
       }
     } catch (err) {
       console.error("Error fetching documents:", err);
+      toast.error("Failed to load documents list.");
     } finally {
       setLoading(false);
     }
@@ -57,6 +59,7 @@ export function useDocumentManager() {
       setSaveStatus("saved");
     } catch (err) {
       console.error("Error fetching document detail:", err);
+      toast.error("Failed to load document content.");
     } finally {
       setDocLoading(false);
     }
@@ -91,12 +94,15 @@ export function useDocumentManager() {
               d.id === docToSave.id ? { ...d, title: docToSave.title } : d
             )
           );
+          toast.success("Document saved", { duration: 1500 });
         } else {
           setSaveStatus("unsaved");
+          toast.error("Failed to save changes.");
         }
       } catch (err) {
         console.error("Error saving document:", err);
         setSaveStatus("unsaved");
+        toast.error("Network error while saving.");
       }
     },
     []
@@ -136,8 +142,10 @@ export function useDocumentManager() {
       setCurrentDocument(newDoc);
       setActiveDocumentId(newDoc.id);
       setSaveStatus("saved");
+      toast.success("New document created!");
     } catch (err) {
       console.error("Error creating document:", err);
+      toast.error("Failed to create new document.");
     }
   };
 
@@ -155,8 +163,10 @@ export function useDocumentManager() {
         setDocuments((prev) =>
           prev.map((d) => (d.id === id ? { ...d, title: newTitle } : d))
         );
+        toast.success("Document renamed");
       } catch (err) {
         console.error("Error renaming document:", err);
+        toast.error("Failed to rename document.");
       }
     }
   };
@@ -176,9 +186,11 @@ export function useDocumentManager() {
             setCurrentDocument(null);
           }
         }
+        toast.info("Document deleted");
       }
     } catch (err) {
       console.error("Error deleting document:", err);
+      toast.error("Failed to delete document.");
     }
   };
 
