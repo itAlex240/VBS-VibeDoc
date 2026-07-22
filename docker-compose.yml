@@ -1,0 +1,16 @@
+services:
+  vbs-vibedoc:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vbs-vibedoc
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - HOSTNAME=0.0.0.0
+      - DATABASE_URL=file:/app/prisma/data/dev.db
+    volumes:
+      # Persistent local volume mount for SQLite database storage
+      - ./prisma/data:/app/prisma/data
