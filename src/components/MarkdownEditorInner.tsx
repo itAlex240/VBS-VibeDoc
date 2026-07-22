@@ -7,6 +7,7 @@ import "@uiw/react-markdown-preview/markdown.css";
 import { toast } from "sonner";
 import rehypeHighlight from "rehype-highlight";
 import vbscript from "highlight.js/lib/languages/vbscript";
+import lua from "highlight.js/lib/languages/lua";
 import "highlight.js/styles/github-dark.css";
 import { Sparkles, Image as ImageIcon } from "lucide-react";
 
@@ -25,7 +26,7 @@ export default function MarkdownEditorInner({
 }: MarkdownEditorInnerProps) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Configure VBScript highlighting for rehype-highlight
+  // Configure VBScript and Lua highlighting for rehype-highlight
   const rehypePlugins = [
     [
       rehypeHighlight,
@@ -33,6 +34,7 @@ export default function MarkdownEditorInner({
         languages: {
           vbscript,
           vbs: vbscript,
+          lua,
         },
       },
     ],
@@ -142,7 +144,7 @@ export default function MarkdownEditorInner({
             className="flex items-center space-x-1 px-2 py-1 text-xs font-medium text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950/40 rounded transition-colors"
           >
             <Sparkles className="w-3.5 h-3.5" />
-            <span>✨ AI Auto-Document</span>
+            <span>✨ AI Auto-Document VBS / BT</span>
           </button>
         )}
       </div>

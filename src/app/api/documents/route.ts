@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-// GET /api/documents - List all documents (or create default if empty)
+// GET /api/documents - List all documents (or create default VBS starter if empty)
 export async function GET() {
   try {
     let documents = await prisma.document.findMany({
@@ -15,34 +15,50 @@ export async function GET() {
       },
     });
 
-    // If no documents exist, seed initial document
+    // If no documents exist, seed initial Virtual Battlespace document
     if (documents.length === 0) {
       const defaultDoc = await prisma.document.create({
         data: {
-          title: "Getting Started with VBS-VibeDoc",
-          markdownContent: `# Welcome to VBS-VibeDoc 🚀
+          title: "VBS Tactical Behavior Tree & Scripting Guide",
+          markdownContent: `# Welcome to VBS-VibeDoc 🪖
 
-VBS-VibeDoc is a self-hosted documentation tool with built-in **AI VBScript auto-documentation** and an interactive **visual drawing canvas**.
+VBS-VibeDoc is a self-hosted documentation web app designed for **Virtual Battlespace (VBS by Bohemia Interactive Simulations)** thesis research, **Behavior Trees (BT)**, and **Lua / SQF scripting**.
 
 ---
 
 ### Features
-1. **Markdown Editor**: Write clean documentation with syntax highlighting for VBScript.
-2. **AI Magic Button**: Auto-analyze and document legacy VBScript code using OpenAI.
-3. **Visual Canvas**: Draw flowcharts, diagrams, and drop screenshots with tldraw below.
-4. **Presentation & Print**: Switch to presentation mode or export to clean PDF.
+1. **Markdown & Code Workspace**: Side-by-side editing with Lua & SQF syntax highlighting.
+2. **AI VBS Auto-Documenter**: Auto-generate structured documentation for Behavior Tree tasks and tactical AI scripts using OpenAI or Google Gemini.
+3. **Visual tldraw Canvas**: Draw tactical flowcharts, BT node trees, and attach mission screenshots.
+4. **Local Image Uploads**: Automatic image asset handling without database bloat.
 
 ---
 
-### Sample VBScript
+### Sample VBS Behavior Tree Task (Lua)
 
-\`\`\`vbscript
-' VBScript Sample Script
-Dim fso, logFile
-Set fso = CreateObject("Scripting.FileSystemObject")
-Set logFile = fso.CreateTextFile("C:\\Logs\\process.log", True)
-logFile.WriteLine("VBScript Execution Started at " & Now())
-logFile.Close()
+\`\`\`lua
+-- Virtual Battlespace (VBS) AI Tactical Patrol Task
+local PatrolTask = {}
+
+function PatrolTask:OnStart(unit, waypoint)
+    if not unit:IsAlive() then return "FAILURE" end
+    unit:MoveTo(waypoint:GetPosition())
+    unit:SetSpeedMode("LIMITED")
+    unit:SetFormation("COLUMN")
+    return "RUNNING"
+end
+
+function PatrolTask:OnUpdate(unit, waypoint)
+    if unit:HasReached(waypoint) then
+        return "SUCCESS"
+    elseif unit:IsUnderFire() then
+        unit:SetBehavior("COMBAT")
+        return "FAILURE"
+    end
+    return "RUNNING"
+end
+
+return PatrolTask
 \`\`\`
 `,
           canvasState: "{}",

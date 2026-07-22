@@ -5,11 +5,11 @@ import { prisma } from "@/lib/prisma";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { vbscriptCode } = body;
+    const { vbscriptCode } = body; // field name kept for backwards compatibility
 
     if (!vbscriptCode || typeof vbscriptCode !== "string" || !vbscriptCode.trim()) {
       return NextResponse.json(
-        { error: "VBScript code is required" },
+        { error: "VBS script / Behavior Tree code snippet is required" },
         { status: 400 }
       );
     }
@@ -20,8 +20,10 @@ export async function POST(request: NextRequest) {
     });
 
     const aiProvider = settings?.aiProvider || "openai";
+    
+    // Virtual Battlespace (VBS by Bohemia Interactive Simulations) prompt
     const systemPrompt =
-      "Analyze this VBScript. Write a concise, professional Markdown documentation covering: 1. Purpose, 2. Input Parameters, 3. Dependencies/Objects used (e.g., FileSystemObject). 4. Step-by-step logic.";
+      "Analyze this Virtual Battlespace (VBS by Bohemia Interactive Simulations) script, Behavior Tree definition, or Lua / SQF snippet. Write a concise, professional Markdown documentation covering: 1. Purpose & Tactical Role, 2. Input Parameters / Variables, 3. Dependencies, VBS API Functions & Behavior Tree Nodes used, 4. Step-by-step Execution Logic.";
 
     // 2. Handle Google Gemini API
     if (aiProvider === "gemini") {
@@ -47,7 +49,7 @@ export async function POST(request: NextRequest) {
               role: "user",
               parts: [
                 {
-                  text: `${systemPrompt}\n\nHere is the raw VBScript code to analyze:\n\`\`\`vbscript\n${vbscriptCode}\n\`\`\``,
+                  text: `${systemPrompt}\n\nHere is the raw VBS (Virtual Battlespace) code / BT snippet to analyze:\n\`\`\`lua\n${vbscriptCode}\n\`\`\``,
                 },
               ],
             },
@@ -91,7 +93,7 @@ export async function POST(request: NextRequest) {
         { role: "system", content: systemPrompt },
         {
           role: "user",
-          content: `Here is the raw VBScript code to document:\n\n\`\`\`vbscript\n${vbscriptCode}\n\`\`\``,
+          content: `Here is the raw Virtual Battlespace (VBS) code / BT snippet to document:\n\n\`\`\`lua\n${vbscriptCode}\n\`\`\``,
         },
       ],
       temperature: 0.3,
@@ -103,12 +105,12 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ documentation });
   } catch (error: any) {
-    console.error("Error in AI VBScript Auto-Documenter:", error);
+    console.error("Error in AI VBS Auto-Documenter:", error);
     return NextResponse.json(
       {
         error:
           error?.message ||
-          "An error occurred while generating VBScript documentation.",
+          "An error occurred while generating VBS script / BT documentation.",
       },
       { status: 500 }
     );

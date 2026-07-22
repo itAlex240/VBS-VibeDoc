@@ -66,7 +66,7 @@ export function Header({
             className="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-medium bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-md transition-all shadow-sm"
           >
             <Sparkles className="w-3.5 h-3.5 text-amber-200 animate-pulse" />
-            <span>✨ Auto-Document VBScript</span>
+            <span>✨ Auto-Document VBS / BT</span>
           </button>
         )}
 

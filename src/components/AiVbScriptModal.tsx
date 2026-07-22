@@ -23,14 +23,14 @@ export function AiVbScriptModal({
 
   const handleGenerate = async () => {
     if (!code.trim()) {
-      setError("Please paste some VBScript code to analyze.");
-      toast.error("Please paste VBScript code first.");
+      setError("Please paste a VBS (Virtual Battlespace) script or Behavior Tree snippet.");
+      toast.error("Please paste VBS code / BT snippet first.");
       return;
     }
 
     setLoading(true);
     setError(null);
-    const toastId = toast.loading("Analyzing VBScript & generating documentation...");
+    const toastId = toast.loading("Analyzing VBS script & Behavior Tree logic...");
 
     try {
       const res = await fetch("/api/ai/document-vbscript", {
@@ -45,11 +45,11 @@ export function AiVbScriptModal({
         throw new Error(data.error || "Failed to generate documentation");
       }
 
-      const formattedMarkdown = `\n\n## 📜 VBScript Documentation\n\n${data.documentation}\n\n### Original VBScript Code\n\`\`\`vbscript\n${code.trim()}\n\`\`\`\n`;
+      const formattedMarkdown = `\n\n## 📜 Virtual Battlespace (VBS) Script & BT Documentation\n\n${data.documentation}\n\n### Original VBS Script / BT Code\n\`\`\`lua\n${code.trim()}\n\`\`\`\n`;
 
       onAppendMarkdown(formattedMarkdown);
       setCode("");
-      toast.success("VBScript documentation generated successfully!", { id: toastId });
+      toast.success("VBS documentation generated successfully!", { id: toastId });
       onClose();
     } catch (err: any) {
       const errorMsg = err.message || "An error occurred during AI generation.";
@@ -71,10 +71,10 @@ export function AiVbScriptModal({
             </div>
             <div>
               <h2 className="text-lg font-semibold tracking-tight">
-                ✨ Auto-Document VBScript
+                ✨ Auto-Document VBS Script / Behavior Tree
               </h2>
               <p className="text-xs text-zinc-500">
-                Paste legacy VBScript code to generate structured Markdown documentation.
+                Analyze Bohemia Interactive Virtual Battlespace (VBS) Lua/SQF scripts & BT node logic.
               </p>
             </div>
           </div>
@@ -99,14 +99,14 @@ export function AiVbScriptModal({
           <div className="flex items-center justify-between text-xs font-medium text-zinc-500">
             <span className="flex items-center space-x-1">
               <Code className="w-3.5 h-3.5" />
-              <span>Raw VBScript Code</span>
+              <span>VBS Script / Behavior Tree Code (Lua / SQF)</span>
             </span>
             <span>{code.length} characters</span>
           </div>
           <textarea
             value={code}
             onChange={(e) => setCode(e.target.value)}
-            placeholder={`Dim fso, folder, file\nSet fso = CreateObject("Scripting.FileSystemObject")\nSet folder = fso.GetFolder("C:\\Data")\nFor Each file In folder.Files\n  WScript.Echo file.Name\nNext`}
+            placeholder={`-- Virtual Battlespace (VBS) Behavior Tree Node / Lua Task\nlocal Task = {}\n\nfunction Task:Execute(unit, target)\n    if unit:IsAlive() and target:IsEnemy() then\n        unit:SetBehavior("COMBAT")\n        unit:EngageTarget(target)\n        return "RUNNING"\n    end\n    return "FAILURE"\nend\n\nreturn Task`}
             rows={10}
             className="w-full p-3 text-xs font-mono bg-[var(--background)] border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 leading-relaxed resize-y"
           />
@@ -136,7 +136,7 @@ export function AiVbScriptModal({
               {loading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Analyzing VBScript...</span>
+                  <span>Analyzing VBS Logic...</span>
                 </>
               ) : (
                 <>

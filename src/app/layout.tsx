@@ -15,8 +15,8 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "VBS-VibeDoc - VBScript Documentation & Visual Workspace",
-  description: "Self-hosted documentation web application with VBScript AI auto-documenter and visual tldraw canvas.",
+  title: "VBS-VibeDoc - Virtual Battlespace Documentation & Workflow Workspace",
+  description: "Self-hosted documentation web application for Bohemia Interactive Virtual Battlespace (VBS), Behavior Trees, and Lua scripting.",
 };
 
 export default function RootLayout({
